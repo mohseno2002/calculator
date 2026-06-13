@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0b0f17">
+<meta name="description" content="آلة حاسبة هندسية ومنصة هيدروليكا متقدمة — منينج، الأعماق الحرجة والطبيعية، معالج تصميم القطاعات، تحويل وحدات">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="هيدروليكا">
+<title>المنصة الهندسية المتكاملة — Hydraulics Suite Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0f17;--panel:#131a26;--panel2:#1c2636;--line:#263347;
+  --txt:#f1f5f9;--muted:#94a3b8;--amber:#f59e0b;--amber-dim:rgba(245,158,11,0.12);
+  --teal:#06b6d4;--teal-dim:rgba(6,182,212,0.15);--rose:#f43f5e;--green:#10b981;
+  --key:#1e293b;--key-hi:#334155;
+  --shadow:0 4px 12px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,0.05);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{background:radial-gradient(140% 100% at 50% 0%,#1a2333 0%,var(--bg) 70%);
+  font-family:'Cairo',sans-serif;color:var(--txt);padding:16px;min-height:100vh;
+  display:flex;justify-content:center;align-items:flex-start;}
+.app{width:100%;max-width:1100px;display:grid;gap:16px;grid-template-columns:1fr;}
+@media(min-width:900px){.app{grid-template-columns:1fr 300px;}}
+.shell{background:var(--panel);border:1px solid var(--line);border-radius:24px;
+  box-shadow:var(--shadow);padding:20px;display:flex;flex-direction:column;gap:16px;}
+.tabs{display:flex;gap:6px;background:#070a10;padding:6px;border-radius:14px;border:1px solid #000;}
+.tab{flex:1;text-align:center;padding:10px 4px;border-radius:10px;cursor:pointer;
+  font-size:14px;color:var(--muted);font-weight:600;transition:.2s;user-select:none;}
+.tab.active{color:var(--txt);background:linear-gradient(180deg,var(--key-hi),var(--key));box-shadow:var(--shadow);}
+.tab.active[data-tab="hyd"]{color:var(--teal);}
+.tab.active[data-tab="wizard"]{color:var(--amber);}
+.wiz-report{background:#070a10;border:1px solid var(--line);border-radius:16px;padding:16px;display:none;}
+.wiz-report.show{display:flex;flex-direction:column;gap:14px;}
+.wiz-head{font-size:15px;font-weight:700;color:var(--amber);border-bottom:1px solid var(--line);padding-bottom:8px;}
+.wiz-sec-title{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:4px;}
+.wiz-note{font-size:11.5px;color:var(--muted);line-height:1.5;}
+.btn-amber{border:none;border-radius:13px;padding:13px;font-weight:700;font-size:15px;font-family:'Cairo',sans-serif;cursor:pointer;background:linear-gradient(180deg,#f7b748,#f59e0b);color:#1a1206;box-shadow:0 3px 10px rgba(245,158,11,.25);transition:transform .06s;}
+.btn-amber:active{transform:translateY(1px);}
+.view{display:none;}.view.active{display:flex;flex-direction:column;gap:16px;}
+.screen{background:linear-gradient(180deg,#070a0f,#0c1017);border:1px solid #020406;
+  border-radius:16px;padding:18px;position:relative;min-height:120px;
+  display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;}
+.statusbar{position:absolute;top:10px;right:18px;left:18px;display:flex;justify-content:space-between;font-size:11px;color:var(--muted);}
+.tag{cursor:pointer;padding:2px 8px;border-radius:6px;font-family:'JetBrains Mono',monospace;}
+.tag.on{color:var(--amber);background:var(--amber-dim);}
+.expr{font-family:'JetBrains Mono',monospace;direction:ltr;text-align:left;color:var(--muted);font-size:16px;min-height:24px;overflow-x:auto;white-space:nowrap;margin-bottom:4px;scrollbar-width:none;}
+.result{font-family:'JetBrains Mono',monospace;direction:ltr;text-align:left;font-size:36px;font-weight:600;overflow-x:auto;white-space:nowrap;scrollbar-width:none;}
+.result.err{color:var(--rose);font-size:22px;}
+.pad{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+button.k{border:none;border-radius:12px;height:46px;cursor:pointer;font-family:'JetBrains Mono',monospace;
+  font-size:16px;color:var(--txt);background:linear-gradient(180deg,var(--key-hi),var(--key));
+  box-shadow:var(--shadow);transition:transform .05s;display:flex;align-items:center;justify-content:center;}
+button.k:active{transform:scale(.96);filter:brightness(1.2);}
+.k.fn{font-size:14px;color:var(--teal);}
+.k.num{background:#242f41;font-size:18px;font-weight:600;}
+.k.op{color:var(--amber);font-size:20px;}
+.k.eq{background:linear-gradient(180deg,#f59e0b,#d97706);color:#000;font-size:24px;font-weight:700;grid-column:span 2;}
+.k.acc{color:var(--rose);}
+.hyd-layout{display:grid;grid-template-columns:1fr;gap:16px;}
+@media(min-width:650px){.hyd-layout{grid-template-columns:1fr 1fr;}}
+.hyd-inputs{display:flex;flex-direction:column;gap:12px;}
+.chip{padding:7px 13px;border-radius:20px;background:#070a10;border:1px solid var(--line);
+  color:var(--muted);font-size:12.5px;cursor:pointer;transition:.15s;font-weight:600;}
+.chip.active{color:#06121a;background:var(--teal);border-color:var(--teal);}
+.form{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));}
+.field{display:flex;flex-direction:column;gap:6px;}
+.field label{font-size:13px;color:var(--muted);display:flex;justify-content:space-between;font-weight:600;}
+.field label .u{color:var(--teal);font-family:'JetBrains Mono',monospace;font-size:11px;}
+.field input,.field select{background:#070a10;border:1px solid var(--line);border-radius:10px;padding:10px 12px;
+  color:var(--txt);font-size:15px;font-family:'JetBrains Mono',monospace;outline:none;transition:.15s;width:100%;}
+.field input:focus,.field select:focus{border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-dim);}
+.hyd-visuals{display:flex;flex-direction:column;gap:12px;}
+.canvas-panel{background:#070a10;border:1px solid var(--line);border-radius:16px;
+  padding:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:160px;}
+.canvas-panel h4{font-size:12px;color:var(--muted);align-self:flex-start;margin-bottom:6px;}
+.out{background:#070a10;border:1px solid var(--line);border-radius:16px;padding:14px;display:none;}
+.out.show{display:flex;flex-direction:column;gap:12px;}
+.out-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;}
+.out-cell{background:var(--panel2);border-radius:10px;padding:10px;border-right:3px solid var(--teal);}
+.out-cell .lbl{font-size:11px;color:var(--muted);margin-bottom:2px;}
+.out-cell .val{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600;direction:ltr;text-align:right;}
+.out-cell .vu{font-size:11px;color:var(--muted);margin-right:2px;}
+.regime{padding:10px;border-radius:10px;font-size:14px;font-weight:700;text-align:center;}
+.regime.sub{background:rgba(16,185,129,0.12);color:var(--green);}
+.regime.crit{background:var(--amber-dim);color:var(--amber);}
+.regime.sup{background:rgba(244,63,94,0.12);color:var(--rose);}
+.warns{display:flex;flex-direction:column;gap:6px;}
+.warn{display:flex;align-items:flex-start;gap:8px;padding:9px 11px;border-radius:10px;font-size:12.5px;line-height:1.4;font-weight:600;}
+.warn .ico{font-size:15px;flex-shrink:0;}
+.warn.danger{background:rgba(244,63,94,0.12);color:var(--rose);}
+.warn.caution{background:var(--amber-dim);color:var(--amber);}
+.warn.info{background:rgba(6,182,212,0.10);color:var(--teal);}
+.warn.ok{background:rgba(16,185,129,0.10);color:var(--green);}
+.side{background:var(--panel);border:1px solid var(--line);border-radius:24px;
+  padding:16px;display:flex;flex-direction:column;gap:12px;max-height:85vh;}
+.side h3{font-size:14px;color:var(--muted);display:flex;justify-content:space-between;align-items:center;}
+.side .clr{font-size:12px;color:var(--rose);cursor:pointer;background:none;border:none;font-weight:600;}
+.hist{display:flex;flex-direction:column;gap:8px;overflow-y:auto;flex:1;scrollbar-width:thin;}
+.hist:empty::after{content:'لا يوجد سجلات حالياً';color:var(--muted);font-size:13px;text-align:center;padding:30px 0;display:block;}
+.hitem{background:#070a10;border:1px solid var(--line);border-radius:10px;padding:10px;cursor:pointer;transition:.15s;}
+.hitem:hover{border-color:var(--teal);}
+.hitem .he{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);direction:ltr;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.hitem .hr{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;direction:ltr;text-align:left;color:var(--amber);margin-top:2px;}
+.hitem.hyd .hr{color:var(--teal);}
+.export{display:flex;gap:6px;}
+.export .btn{flex:1;padding:10px;font-size:13px;background:#070a10;border:1px solid var(--line);color:var(--txt);border-radius:10px;cursor:pointer;font-weight:600;}
+.unit-row{display:grid;grid-template-columns:1fr 44px 1fr;gap:10px;align-items:end;}
+.swap{height:44px;border-radius:10px;border:1px solid var(--line);background:#070a10;color:var(--teal);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;}
+.eqnote{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);text-align:left;direction:ltr;margin-top:4px;line-height:1.4;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="shell">
+    <div class="tabs">
+      <div class="tab active" data-tab="calc">الحاسبة العلمية</div>
+      <div class="tab" data-tab="hyd">الهيدروليكا المتقدمة</div>
+      <div class="tab" data-tab="wizard">معالج التصميم</div>
+      <div class="tab" data-tab="units">تحويل الوحدات</div>
+    </div>
+    <div class="view active" id="v-calc">
+      <div class="screen">
+        <div class="statusbar">
+          <span id="memind" style="opacity:0;font-weight:bold;color:var(--teal)">M</span>
+          <span style="display:flex;gap:8px">
+            <span class="tag" id="tagInv">INV</span>
+            <span class="tag" id="tagAng">DEG</span>
+          </span>
+        </div>
+        <div class="expr" id="expr"></div>
+        <div class="result" id="result">0</div>
+      </div>
+      <div class="pad">
+        <button class="k fn" data-i="(">(</button>
+        <button class="k fn" data-i=")">)</button>
+        <button class="k fn" data-fn="fact">n!</button>
+        <button class="k fn" data-i="%">%</button>
+        <button class="k fn acc" data-act="mem">MR</button>
+        <button class="k fn" data-fn="sin">sin</button>
+        <button class="k fn" data-fn="cos">cos</button>
+        <button class="k fn" data-fn="tan">tan</button>
+        <button class="k fn" data-i="^">x&#x02B8;</button>
+        <button class="k fn" data-fn="sqrt">&#8730;</button>
+        <button class="k fn" data-fn="ln">ln</button>
+        <button class="k fn" data-fn="log">log</button>
+        <button class="k fn" data-pow="2">x&#xB2;</button>
+        <button class="k fn" data-fn="cbrt">&#8731;</button>
+        <button class="k fn" data-fn="inv">1/x</button>
+        <button class="k fn" data-const="pi">&#960;</button>
+        <button class="k fn" data-const="e">e</button>
+        <button class="k fn" data-i="E">EXP</button>
+        <button class="k fn" data-fn="abs">|x|</button>
+        <button class="k fn acc" data-act="msave">MS</button>
+      </div>
+      <div class="pad">
+        <button class="k acc" data-act="ac">AC</button>
+        <button class="k acc" data-act="del">&#9003;</button>
+        <button class="k op" data-i="&#247;">&#247;</button>
+        <button class="k op" data-i="&#215;">&#215;</button>
+        <button class="k fn" data-fn="rand">rnd</button>
+        <button class="k num" data-i="7">7</button>
+        <button class="k num" data-i="8">8</button>
+        <button class="k num" data-i="9">9</button>
+        <button class="k op" data-i="-">&#8722;</button>
+        <button class="k fn" data-i=" mod ">mod</button>
+        <button class="k num" data-i="4">4</button>
+        <button class="k num" data-i="5">5</button>
+        <button class="k num" data-i="6">6</button>
+        <button class="k op" data-i="+">+</button>
+        <button class="k fn" data-fn="asin">sin&#8315;&#185;</button>
+        <button class="k num" data-i="1">1</button>
+        <button class="k num" data-i="2">2</button>
+        <button class="k num" data-i="3">3</button>
+        <button class="k fn" data-fn="acos">cos&#8315;&#185;</button>
+        <button class="k fn" data-fn="atan">tan&#8315;&#185;</button>
+        <button class="k num" data-i="0">0</button>
+        <button class="k num" data-i=".">.</button>
+        <button class="k op" data-act="ans">Ans</button>
+        <button class="k eq" data-act="eq">=</button>
+      </div>
+    </div>
+    <div class="view" id="v-hyd">
+      <div class="hyd-pick" id="hydPick" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px;">
+        <div class="chip active" data-h="manning">معادلة منينج (Q)</div>
+        <div class="chip" data-h="normal">العمق الطبيعي (yn)</div>
+        <div class="chip" data-h="critical">العمق الحرج (yc)</div>
+      </div>
+      <div class="hyd-layout">
+        <div class="hyd-inputs">
+          <div class="field">
+            <label>شكل القطاع الهيدروليكي</label>
+            <select id="hydShape">
+              <option value="trapezoid">شبه منحرف / مستطيل (z=0)</option>
+              <option value="triangular">مثلثي (مجاري صغيرة / مصارف)</option>
+              <option value="circular">دائري (مواسير / أنفاق)</option>
+            </select>
+          </div>
+          <div class="form" id="hydForm"></div>
+        </div>
+        <div class="hyd-visuals">
+          <div class="canvas-panel">
+            <h4>القطاع العرضي اللحظي</h4>
+            <svg id="hydSvg" width="220" height="130" style="background:#020508;border-radius:8px;"></svg>
+          </div>
+          <div class="out" id="hydOut">
+            <div class="regime" id="hydRegime"></div>
+            <div class="out-grid" id="hydOutGrid"></div>
+            <div class="warns" id="hydWarns"></div>
+            <div class="eqnote" id="hydEq"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="view" id="v-wizard">
+      <div class="hyd-pick" id="wizShapePick" style="display:flex;gap:6px;flex-wrap:wrap;">
+        <div class="chip active" data-ws="trapezoid">شبه منحرف</div>
+        <div class="chip" data-ws="rectangle">مستطيل</div>
+        <div class="chip" data-ws="triangle">مثلثي</div>
+      </div>
+      <div class="wiz-note" style="margin:2px 0 4px;">يصمّم المعالج <b>القطاع الأكثر كفاءة هيدروليكياً</b> (أصغر محيط مبلل لتصرف معطى) من التصرف المطلوب، ثم يضيف البُحبوحة (Freeboard) ويتحقق من السرعة والاقتصادية.</div>
+      <div class="form" id="wizForm"></div>
+      <button class="btn-amber" id="wizRun">صمّم القطاع</button>
+      <div class="wiz-report" id="wizReport"></div>
+    </div>
+
+    <div class="view" id="v-units">
+      <div class="hyd-pick" id="unitPick" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;"></div>
+      <div class="unit-row">
+        <div class="field">
+          <label>من <span class="u" id="uFromU"></span></label>
+          <select id="uFrom"></select>
+          <input id="uVal" type="number" inputmode="decimal" value="1">
+        </div>
+        <button class="swap" id="uSwap">&#8646;</button>
+        <div class="field">
+          <label>إلى <span class="u" id="uToU"></span></label>
+          <select id="uTo"></select>
+          <input id="uResult" readonly style="color:var(--amber);font-weight:bold;">
+        </div>
+      </div>
+      <div class="eqnote" id="uNote" style="text-align:center;margin-top:12px;"></div>
+    </div>
+  </div>
+  <div class="side">
+    <h3>سجل العمليات <button class="clr" id="histClr">مسح الكل</button></h3>
+    <div class="hist" id="hist"></div>
+    <div class="export">
+      <button class="btn" id="expCsv">تصدير CSV &#11015;</button>
+      <button class="btn" id="expTxt">نسخ السجل</button>
+    </div>
+  </div>
+</div>
+<script>
+const STORE='engCalc_v3';
+let S={history:[]};
+try{const raw=localStorage.getItem(STORE);if(raw)S=JSON.parse(raw);}catch(e){}
+function save(){try{localStorage.setItem(STORE,JSON.stringify(S));}catch(e){}}
+let deg=true,inv=false,mem=0,hasMem=false,ans=0;
+const consts={pi:Math.PI,e:Math.E};
+const toRad=x=>deg?x*Math.PI/180:x,fromRad=x=>deg?x*180/Math.PI:x;
+function gamma(z){const g=7,c=[0.99999999999980993,676.5203681218851,-1259.1392167224028,771.32342877765313,-176.61502916214059,12.507343278686905,-0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];if(z<0.5)return Math.PI/(Math.sin(Math.PI*z)*gamma(1-z));z-=1;let x=c[0];const t=z+g+0.5;for(let i=1;i<g+2;i++)x+=c[i]/(z+i);return Math.sqrt(2*Math.PI)*Math.pow(t,z+0.5)*Math.exp(-t)*x;}
+const funcs={sin:x=>Math.sin(toRad(x)),cos:x=>Math.cos(toRad(x)),tan:x=>Math.tan(toRad(x)),asin:x=>fromRad(Math.asin(x)),acos:x=>fromRad(Math.acos(x)),atan:x=>fromRad(Math.atan(x)),ln:Math.log,log:Math.log10,sqrt:Math.sqrt,cbrt:Math.cbrt,abs:Math.abs,exp:Math.exp,fact:x=>(x<0||x!==Math.floor(x))?gamma(x+1):(()=>{let r=1;for(let i=2;i<=x;i++)r*=i;return r;})()};
+function tokenize(s){
+  s=s.replace(/\u00D7/g,'*').replace(/\u00F7/g,'/').replace(/\u2212/g,'-').replace(/\u00B2/g,'^2').replace(/\u221A/g,'sqrt').replace(/\u221B/g,'cbrt').replace(/\u03C0/g,'pi').replace(/E/g,'*10^');
+  const t=[];let i=0;const ops='+-*/^%';
+  while(i<s.length){const c=s[i];
+    if(c===' '){i++;continue;}
+    if(/[0-9.]/.test(c)){let n='';while(i<s.length&&/[0-9.]/.test(s[i]))n+=s[i++];t.push({t:'num',v:parseFloat(n)});continue;}
+    if(/[a-z]/i.test(c)){let w='';while(i<s.length&&/[a-z0-9]/i.test(s[i]))w+=s[i++];
+      if(w==='mod')t.push({t:'op',v:'mod'});else if(w in consts)t.push({t:'num',v:consts[w]});else if(w in funcs)t.push({t:'func',v:w});else throw'Error';continue;}
+    if(c==='('){t.push({t:'lp'});i++;continue;}
+    if(c===')'){t.push({t:'rp'});i++;continue;}
+    if(ops.includes(c)){const p=t[t.length-1];if(c==='-'&&(!p||p.t==='op'||p.t==='lp'))t.push({t:'num',v:0});t.push({t:'op',v:c});i++;continue;}
+    throw'Error';}
+  return t;
+}
+const prec={'+':1,'-':1,'*':2,'/':2,'mod':2,'%':2,'^':4},rA={'^':1};
+function evaluate(str){
+  const tk=tokenize(str),out=[],op=[];
+  for(const x of tk){
+    if(x.t==='num')out.push(x);
+    else if(x.t==='func')op.push(x);
+    else if(x.t==='op'){while(op.length){const top=op[op.length-1];if(top.t==='func'||(top.t==='op'&&(prec[top.v]>prec[x.v]||(prec[top.v]===prec[x.v]&&!rA[x.v]))))out.push(op.pop());else break;}op.push(x);}
+    else if(x.t==='lp')op.push(x);
+    else if(x.t==='rp'){while(op.length&&op[op.length-1].t!=='lp')out.push(op.pop());if(!op.length)throw'Error';op.pop();if(op.length&&op[op.length-1].t==='func')out.push(op.pop());}
+  }
+  while(op.length){const o=op.pop();if(o.t==='lp')throw'Error';out.push(o);}
+  const st=[];
+  for(const x of out){
+    if(x.t==='num')st.push(x.v);
+    else if(x.t==='func')st.push(funcs[x.v](st.pop()));
+    else{const b=st.pop(),a=st.pop();if(a===undefined||b===undefined)throw'Error';
+      st.push(x.v==='+'?a+b:x.v==='-'?a-b:x.v==='*'?a*b:x.v==='/'?a/b:x.v==='^'?Math.pow(a,b):x.v==='%'?a/100*b:a%b);}
+  }
+  if(st.length!==1)throw'Error';return st[0];
+}
+const fmt=n=>{if(!isFinite(n))return n>0?'\u221E':(n<0?'-\u221E':'NaN');if(Math.abs(n)>=1e15||(Math.abs(n)<1e-9&&n!==0))return n.toExponential(6).replace(/\.?0+e/,'e');return parseFloat(n.toPrecision(12)).toString();};
+const $=id=>document.getElementById(id);
+const exprEl=$('expr'),resEl=$('result'),tagAng=$('tagAng'),tagInv=$('tagInv'),memInd=$('memind');
+let buf='',justEval=false;
+function render(){exprEl.textContent=buf||'';}
+function setRes(v,err){resEl.textContent=v;resEl.classList.toggle('err',!!err);}
+function liveEval(){if(!buf){setRes('0');return;}try{const v=evaluate(buf);if(/[\d)\u03C0]$/.test(buf))setRes(fmt(v));}catch(e){}}
+function input(s){if(justEval&&/[0-9.]/.test(s))buf='';justEval=false;buf+=s;render();liveEval();}
+function inputFn(name){
+  if(justEval){buf='';justEval=false;}
+  if(inv){const m={sin:'asin',cos:'acos',tan:'atan',asin:'sin',acos:'cos',atan:'tan'};if(m[name])name=m[name];}
+  if(name==='inv')buf+='1/(';else if(name==='sqrt')buf+='\u221A(';else if(name==='cbrt')buf+='\u221B(';else if(name==='abs')buf+='abs(';else if(name==='fact')buf+='fact(';else if(name==='rand')buf+=fmt(Math.random());else buf+=name+'(';
+  render();
+}
+document.querySelectorAll('#v-calc button.k').forEach(b=>{
+  b.addEventListener('click',()=>{const d=b.dataset;if(d.act)return handleAct(d.act);if(d.const)return input(d.const==='pi'?'\u03C0':'e');if(d.pow){if(justEval)justEval=false;buf+='\u00B2';render();liveEval();return;}if(d.fn)return inputFn(d.fn);if(d.i!==undefined)input(d.i);});
+});
+function handleAct(a){
+  switch(a){
+    case'ac':buf='';render();setRes('0');justEval=false;break;
+    case'del':buf=buf.slice(0,-1);render();liveEval();break;
+    case'ans':input(fmt(ans));break;
+    case'eq':try{const v=evaluate(buf);ans=v;addHist(buf,fmt(v),'calc');setRes(fmt(v));exprEl.textContent=buf;buf=fmt(v);justEval=true;}catch(e){setRes('خطأ في الصيغة',true);}break;
+    case'msave':try{mem=buf?evaluate(buf):ans;hasMem=true;memInd.style.opacity=1;}catch(e){}break;
+    case'mem':if(hasMem)input(fmt(mem));break;
+  }
+}
+tagAng.onclick=()=>{deg=!deg;tagAng.textContent=deg?'DEG':'RAD';tagAng.classList.toggle('on',!deg);liveEval();};
+tagInv.onclick=()=>{inv=!inv;tagInv.classList.toggle('on',inv);};
+window.addEventListener('keydown',e=>{
+  if(!$('v-calc').classList.contains('active'))return;
+  const k=e.key;
+  if(/[0-9]/.test(k))input(k);else if(k==='.')input('.');
+  else if(k==='+')input('+');else if(k==='-')input('\u2212');
+  else if(k==='*')input('\u00D7');else if(k==='/'){e.preventDefault();input('\u00F7');}
+  else if(k==='(')input('(');else if(k===')')input(')');
+  else if(k==='^')input('^');else if(k==='%')input('%');
+  else if(k==='Enter'||k==='='){e.preventDefault();handleAct('eq');}
+  else if(k==='Backspace')handleAct('del');else if(k==='Escape')handleAct('ac');
+});
+const g=9.81;
+function geomTrapezoid(b,y,z){const A=(b+z*y)*y;const P=b+2*y*Math.sqrt(1+z*z);const T=b+2*z*y;return{A,P,T,R:P>0?A/P:0};}
+function geomTriangular(z,y){const A=z*y*y;const P=2*y*Math.sqrt(1+z*z);const T=2*z*y;return{A,P,T,R:P>0?A/P:0};}
+function geomCircular(d,y){
+  if(y<=0)return{A:0,P:0,T:0,R:0};if(y>=d)y=d*0.9999;
+  const r=d/2;const theta=2*Math.acos((r-y)/r);
+  const A=0.5*r*r*(theta-Math.sin(theta));const P=r*theta;const T=2*Math.sqrt(y*(d-y));return{A,P,T,R:P>0?A/P:0};
+}
+function getGeom(shape,p1,y,p2){
+  if(shape==='circular')return geomCircular(p1,y);
+  if(shape==='triangular')return geomTriangular(p2,y);
+  return geomTrapezoid(p1,y,p2);
+}
+function validateInputs(shape,need,v){
+  for(const k of need){if(v[k]===null||v[k]===undefined||isNaN(v[k]))throw'أكمل كل الحقول بقيم رقمية';}
+  if('n' in v&&v.n<=0)throw'معامل الخشونة n يجب أن يكون أكبر من صفر';
+  if('S' in v&&v.S<=0)throw'الميل الطولي S يجب أن يكون موجباً (>0)';
+  if('y' in v&&v.y<=0)throw'عمق الماء y يجب أن يكون أكبر من صفر';
+  if('Q' in v&&v.Q<=0)throw'التصرف Q يجب أن يكون أكبر من صفر';
+  if(shape==='circular'){if(v.d<=0)throw'القطر D يجب أن يكون أكبر من صفر';if('y' in v&&v.y>=v.d)throw'عمق الماء y يجب أن يكون أقل من القطر D';}
+  if(shape==='trapezoid'){if(v.b<0)throw'عرض القاع b لا يمكن أن يكون سالباً';if(v.z<0)throw'الميل الجانبي z لا يمكن أن يكون سالباً';}
+  if(shape==='triangular'){if(v.z<=0)throw'القطاع المثلثي يحتاج ميلاً جانبياً z أكبر من صفر';}
+}
+const HYD={
+  manning:{
+    title:'حساب التصرف (Manning Q)',
+    fields:{
+      trapezoid:[['b','عرض القاع (b)','m',2],['y','عمق الماء (y)','m',1],['z','الميل الجانبي (z)','',1.5],['n','معامل الخشونة (n)','',0.025],['S','الميل الطولي (S)','m/m',0.0005]],
+      triangular:[['z','الميل الجانبي (z)','',1.5],['y','عمق الماء (y)','m',1],['n','معامل الخشونة (n)','',0.025],['S','الميل الطولي (S)','m/m',0.001]],
+      circular:[['d','القطر الكامل (D)','m',1.5],['y','عمق الماء (y)','m',0.8],['n','معامل الخشونة (n)','',0.015],['S','الميل الطولي (S)','m/m',0.001]]
+    },
+    needs:{trapezoid:['b','y','z','n','S'],triangular:['z','y','n','S'],circular:['d','y','n','S']},
+    calc(shape,v){
+      const p1=shape==='circular'?v.d:v.b;const p2=v.z;
+      const {A,P,T,R}=getGeom(shape,p1,v.y,p2);if(A<=0||P<=0)throw'أبعاد غير صالحة';
+      const Q=(1/v.n)*A*Math.pow(R,2/3)*Math.sqrt(v.S);const V=Q/A;const Fr=T>0?V/Math.sqrt(g*A/T):0;
+      return {out:[['التصرف Q',fmt(Q),'m\u00B3/s'],['السرعة V',fmt(V),'m/s'],['المساحة A',fmt(A),'m\u00B2'],['المحيط P',fmt(P),'m'],['نصف القطر R',fmt(R),'m'],['عدد فرود Fr',fmt(Fr),'']],
+        regime:Fr,V,eq:'Q = (1/n)\u00B7A\u00B7R^(2/3)\u00B7\u221AS',label:'Q = '+fmt(Q)+' m\u00B3/s',y:v.y,p1,p2,shape};
+    }
+  },
+  normal:{
+    title:'حساب العمق الطبيعي (yn)',
+    fields:{
+      trapezoid:[['Q','التصرف المستهدف (Q)','m\u00B3/s',5],['b','عرض القاع (b)','m',2],['z','الميل الجانبي (z)','',1.5],['n','معامل الخشونة (n)','',0.025],['S','الميل الطولي (S)','m/m',0.0005]],
+      triangular:[['Q','التصرف المستهدف (Q)','m\u00B3/s',2],['z','الميل الجانبي (z)','',1.5],['n','معامل الخشونة (n)','',0.025],['S','الميل الطولي (S)','m/m',0.001]],
+      circular:[['Q','التصرف المستهدف (Q)','m\u00B3/s',1.2],['d','القطر الكامل (D)','m',1.5],['n','معامل الخشونة (n)','',0.015],['S','الميل الطولي (S)','m/m',0.001]]
+    },
+    needs:{trapezoid:['Q','b','z','n','S'],triangular:['Q','z','n','S'],circular:['Q','d','n','S']},
+    calc(shape,v){
+      const p1=shape==='circular'?v.d:v.b;const p2=v.z;
+      const f=y=>{const{A,R}=getGeom(shape,p1,y,p2);return (1/v.n)*A*Math.pow(R,2/3)*Math.sqrt(v.S)-v.Q;};
+      let lo=1e-5,hi=shape==='circular'?v.d*0.999:60;
+      if(f(hi)<0)throw'القطاع المختار لا يستوعب هذا التصرف — كبّر الأبعاد أو الميل';
+      for(let i=0;i<100;i++){const mid=(lo+hi)/2;if(f(mid)>0)hi=mid;else lo=mid;}
+      const yn=(lo+hi)/2;const{A,P,T,R}=getGeom(shape,p1,yn,p2);const V=v.Q/A;const Fr=T>0?V/Math.sqrt(g*A/T):0;
+      return {out:[['العمق الطبيعي yn',fmt(yn),'m'],['السرعة V',fmt(V),'m/s'],['المساحة A',fmt(A),'m\u00B2'],['المحيط P',fmt(P),'m'],['نصف القطر R',fmt(R),'m'],['عدد فرود Fr',fmt(Fr),'']],
+        regime:Fr,V,eq:'حل تكراري (Bisection) لمعادلة منينج',label:'yn = '+fmt(yn)+' m',y:yn,p1,p2,shape};
+    }
+  },
+  critical:{
+    title:'حساب العمق الحرج (yc)',
+    fields:{
+      trapezoid:[['Q','التصرف (Q)','m\u00B3/s',5],['b','عرض القاع (b)','m',2],['z','الميل الجانبي (z)','',1.5]],
+      triangular:[['Q','التصرف (Q)','m\u00B3/s',2],['z','الميل الجانبي (z)','',1.5]],
+      circular:[['Q','التصرف (Q)','m\u00B3/s',1.2],['d','القطر الكامل (D)','m',1.5]]
+    },
+    needs:{trapezoid:['Q','b','z'],triangular:['Q','z'],circular:['Q','d']},
+    calc(shape,v){
+      const p1=shape==='circular'?v.d:v.b;const p2=v.z;
+      const f=y=>{const{A,T}=getGeom(shape,p1,y,p2);return T>0?(v.Q*v.Q*T)/(g*A*A*A)-1:1;};
+      let lo=1e-5,hi=shape==='circular'?v.d*0.999:60;
+      for(let i=0;i<100;i++){const mid=(lo+hi)/2;if(f(mid)>0)lo=mid;else hi=mid;}
+      const yc=(lo+hi)/2;const{A,T,P}=getGeom(shape,p1,yc,p2);const Vc=v.Q/A;const Ec=yc+Vc*Vc/(2*g);
+      return {out:[['العمق الحرج yc',fmt(yc),'m'],['السرعة الحرجة Vc',fmt(Vc),'m/s'],['المساحة A',fmt(A),'m\u00B2'],['المحيط P',fmt(P),'m'],['الطاقة النوعية الدنيا Ec',fmt(Ec),'m']],
+        regime:1,V:Vc,eq:'الشرط الحرج: Q\u00B2\u00B7T / (g\u00B7A\u00B3) = 1',label:'yc = '+fmt(yc)+' m',y:yc,p1,p2,shape};
+    }
+  }
+};
+let curH='manning';
+function buildHydForm(){
+  const shape=$('hydShape').value;const fields=HYD[curH].fields[shape];const f=$('hydForm');f.innerHTML='';
+  fields.forEach(([key,lbl,unit,def])=>{
+    const d=document.createElement('div');d.className='field';
+    d.innerHTML='<label>'+lbl+' <span class="u">'+unit+'</span></label><input data-k="'+key+'" type="number" inputmode="decimal" value="'+def+'">';
+    f.appendChild(d);
+    d.querySelector('input').addEventListener('input',executeHydCalculation);
+  });
+  executeHydCalculation();
+}
+function designWarnings(r){
+  const w=[];const V=r.V;
+  if(isFinite(V)){
+    if(V>2.0)w.push(['danger','\u26A0','سرعة عالية ('+fmt(V)+' m/s) — خطر نحر القاع والجوانب (Scouring). الحد الآمن للقنوات المبطنة \u2248 2 m/s.']);
+    else if(V<0.3)w.push(['caution','\u25D4','سرعة منخفضة ('+fmt(V)+' m/s) — احتمال إطماء وترسيب (Silting). يُفضّل ألا تقل عن 0.3–0.6 m/s.']);
+    else w.push(['ok','\u2713','السرعة ('+fmt(V)+' m/s) ضمن النطاق الآمن ضد النحر والإطماء.']);
+  }
+  if(r.regime!==undefined&&Math.abs(r.regime-1)<=0.1&&r.regime!==1){
+    w.push(['info','\u2248','عدد فرود ('+fmt(r.regime)+') قريب جداً من 1 — منطقة سريان غير مستقر (\u00B110% حول الحرج)، يُفضّل تجنبها في التصميم.']);
+  }
+  return w;
+}
+function executeHydCalculation(){
+  const shape=$('hydShape').value;const h=HYD[curH];const v={};
+  $('hydForm').querySelectorAll('input').forEach(i=>{const t=i.value.trim();v[i.dataset.k]=t===''?null:parseFloat(t);});
+  try{
+    validateInputs(shape,h.needs[shape],v);
+    const r=h.calc(shape,v);
+    $('hydOutGrid').innerHTML=r.out.map(o=>'<div class="out-cell"><div class="lbl">'+o[0]+'</div><div class="val">'+o[1]+'<span class="vu">'+o[2]+'</span></div></div>').join('');
+    const rg=$('hydRegime');rg.style.display='block';
+    if(Math.abs(r.regime-1)<0.03){rg.className='regime crit';rg.textContent='جريان حرج (Fr \u2248 1)';}
+    else if(r.regime<1){rg.className='regime sub';rg.textContent='جريان هادئ تحت حرج (Fr < 1)';}
+    else{rg.className='regime sup';rg.textContent='جريان سريع فوق حرج (Fr > 1)';}
+    const warns=designWarnings(r);
+    $('hydWarns').innerHTML=warns.map(x=>'<div class="warn '+x[0]+'"><span class="ico">'+x[1]+'</span><span>'+x[2]+'</span></div>').join('');
+    $('hydEq').textContent=r.eq;$('hydOut').classList.add('show');
+    drawSectionSvg(r.shape,r.y,r.p1,r.p2);
+  }catch(e){
+    $('hydOutGrid').innerHTML='<div class="out-cell" style="grid-column:1/-1;border-color:var(--rose)"><div class="val" style="color:var(--rose);font-size:13px;text-align:center;direction:rtl;">'+e+'</div></div>';
+    $('hydRegime').style.display='none';$('hydWarns').innerHTML='';$('hydEq').textContent='';$('hydOut').classList.add('show');
+    clearSvg();
+  }
+}
+function drawSectionSvg(shape,y,p1,p2){
+  const svg=$('hydSvg');svg.innerHTML='';
+  const W=220,H=130;
+  if(shape==='trapezoid'||shape==='triangular'){
+    const b=shape==='triangular'?0:p1,z=p2;const maxH=y*1.4;const topW=Math.max(b+2*z*maxH,0.001);
+    const scale=Math.min(W/topW,H/Math.max(maxH,0.001))*0.8;
+    const cx=W/2,cy=H-15;
+    const x1=cx-b/2*scale,x2=cx+b/2*scale;
+    const x0=x1-z*maxH*scale,x3=x2+z*maxH*scale;
+    const yTop=cy-maxH*scale;
+    const canalPath='M '+x0+' '+yTop+' L '+x1+' '+cy+' L '+x2+' '+cy+' L '+x3+' '+yTop;
+    const wx1=x1-z*y*scale,wx2=x2+z*y*scale,wy=cy-y*scale;
+    const waterPath='M '+wx1+' '+wy+' L '+x1+' '+cy+' L '+x2+' '+cy+' L '+wx2+' '+wy+' Z';
+    svg.innerHTML='<path d="'+waterPath+'" fill="rgba(6,182,212,0.3)" stroke="var(--teal)" stroke-width="1"/><path d="'+canalPath+'" fill="none" stroke="var(--muted)" stroke-width="2.5"/><line x1="'+wx1+'" y1="'+wy+'" x2="'+wx2+'" y2="'+wy+'" stroke="#06b6d4" stroke-width="1.5" stroke-dasharray="2,2"/>';
+  }else{
+    const d=p1;const scale=(H*0.8)/d;const r=d/2*scale;const cx=W/2,cy=H/2;
+    const svgY=cy+r-y*scale;
+    let inner;
+    if(y>0&&y<d){
+      const theta=2*Math.acos((d/2-y)/(d/2));const xL=cx-r*Math.sin(theta/2),xR=cx+r*Math.sin(theta/2);
+      inner='<path d="M '+xL+' '+svgY+' A '+r+' '+r+' 0 0 0 '+xR+' '+svgY+' Z" fill="rgba(6,182,212,0.3)" stroke="var(--teal)" stroke-width="1.5"/><line x1="'+xL+'" y1="'+svgY+'" x2="'+xR+'" y2="'+svgY+'" stroke="var(--teal)" stroke-width="1" stroke-dasharray="3,3"/>';
+    }else{
+      inner='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="rgba(6,182,212,0.3)" stroke="var(--teal)" stroke-width="1.5"/>';
+    }
+    svg.innerHTML='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="var(--muted)" stroke-width="2.5"/>'+inner;
+  }
+}
+function clearSvg(){$('hydSvg').innerHTML='';}
+$('hydShape').onchange=buildHydForm;
+document.querySelectorAll('#hydPick .chip').forEach(c=>{
+  c.onclick=()=>{document.querySelectorAll('#hydPick .chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');curH=c.dataset.h;buildHydForm();};
+});
+let hydLogTimer=null;
+document.addEventListener('change',e=>{
+  if(e.target&&e.target.closest&&e.target.closest('#hydForm')){
+    clearTimeout(hydLogTimer);
+    hydLogTimer=setTimeout(()=>{
+      const out=$('hydOut');if(!out.classList.contains('show'))return;
+      const firstVal=out.querySelector('.out-cell .val');if(!firstVal)return;
+      if($('hydRegime').style.display==='none')return;
+      addHist(HYD[curH].title,firstVal.textContent.trim(),'hyd');
+    },900);
+  }
+});
+const UNITS={
+  'التصرف المائي':{base:'m\u00B3/s',u:{'m\u00B3/s':1,'L/s':0.001,'m\u00B3/hr':1/3600,'m\u00B3/day':1/86400,'MCM/day':1e6/86400,'ft\u00B3/s (cfs)':0.0283168}},
+  'الأطوال والمناسيب':{base:'m',u:{'m':1,'cm':0.01,'km':1000,'ft':0.3048,'inch':0.0254}},
+  'المساحة السطحية':{base:'m\u00B2',u:{'m\u00B2':1,'فدان (Feddan)':4200,'هكتار (Hectare)':10000,'km\u00B2':1e6,'Acre':4046.86}},
+  'سرعة التدفق':{base:'m/s',u:{'m/s':1,'km/h':1/3.6,'cm/s':0.01,'ft/s':0.3048}},
+  'الحجم':{base:'m\u00B3',u:{'m\u00B3':1,'L':0.001,'MCM':1e6,'ft\u00B3':0.0283168}}
+};
+let curU=Object.keys(UNITS)[0];
+function buildUnitPick(){
+  const p=$('unitPick');p.innerHTML='';
+  Object.keys(UNITS).forEach((k,i)=>{const c=document.createElement('div');c.className='chip'+(i===0?' active':'');c.textContent=k;c.onclick=()=>{document.querySelectorAll('#unitPick .chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');curU=k;fillUnitSelects();convertU();};p.appendChild(c);});
+}
+function fillUnitSelects(){
+  const keys=Object.keys(UNITS[curU].u);
+  ['uFrom','uTo'].forEach((id,idx)=>{const s=$(id);s.innerHTML=keys.map(k=>'<option>'+k+'</option>').join('');s.selectedIndex=idx===0?0:Math.min(1,keys.length-1);});
+}
+function convertU(){
+  const fromK=$('uFrom').value,toK=$('uTo').value;$('uFromU').textContent=fromK;$('uToU').textContent=toK;
+  const val=parseFloat($('uVal').value);if(isNaN(val)){$('uResult').value='';$('uNote').textContent='';return;}
+  const f=UNITS[curU].u,base=val*f[fromK],res=base/f[toK];$('uResult').value=fmt(res);
+  $('uNote').textContent=fmt(val)+' '+fromK+' = '+fmt(res)+' '+toK;
+}
+['uVal','uFrom','uTo'].forEach(id=>$(id).addEventListener('input',convertU));
+$('uSwap').onclick=()=>{const a=$('uFrom').value;$('uFrom').value=$('uTo').value;$('uTo').value=a;convertU();};
+function addHist(expr,res,type){
+  if(S.history[0]&&S.history[0].expr===expr&&S.history[0].res===res)return;
+  S.history.unshift({expr,res,type,t:Date.now()});if(S.history.length>40)S.history.pop();save();renderHist();
+}
+function renderHist(){
+  const h=$('hist');h.innerHTML='';
+  S.history.forEach(it=>{
+    const d=document.createElement('div');d.className='hitem'+(it.type==='hyd'?' hyd':'');
+    d.innerHTML='<div class="he">'+it.expr+'</div><div class="hr">'+it.res+'</div>';
+    d.onclick=()=>{if(it.type==='calc'){switchTab('calc');buf=it.res.replace(/[^0-9.eE+-]/g,'');render();liveEval();}};
+    h.appendChild(d);
+  });
+}
+$('histClr').onclick=()=>{if(confirm('مسح كل السجل؟')){S.history=[];save();renderHist();}};
+$('expCsv').onclick=()=>{
+  const rows=[['النوع','الصيغة/المنشأ','النتيجة','التوقيت']].concat(S.history.map(i=>[i.type,i.expr,i.res,new Date(i.t).toLocaleString('ar-EG')]));
+  const csv='\uFEFF'+rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Hydraulics_Suite_Log.csv';a.click();
+};
+$('expTxt').onclick=()=>{
+  const txt=S.history.map(i=>i.expr+' => '+i.res).join('\n');
+  navigator.clipboard.writeText(txt).then(()=>{$('expTxt').textContent='تم النسخ \u2713';setTimeout(()=>$('expTxt').textContent='نسخ السجل',1500);});
+};
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===name));
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='v-'+name));
+}
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>switchTab(t.dataset.tab));
+const NMAT=[
+  ['خرسانة ناعمة (مقولبة)',0.012],['خرسانة عادية',0.015],['خرسانة قديمة/خشنة',0.017],
+  ['مباني طوب',0.015],['دبش حجري (Riprap)',0.030],
+  ['ترابية نظيفة جديدة',0.020],['ترابية في حالة جيدة',0.022],['ترابية بها حصى',0.025],
+  ['ترابية بحشائش خفيفة',0.030],['ترابية بحشائش كثيفة',0.035]
+];
+let wizShape='trapezoid';
+function wizFields(){
+  const common=[['Q','التصرف المطلوب (Q)','m\u00B3/s',10],['S','الميل الطولي (S)','m/m',0.0005]];
+  const z=['z','الميل الجانبي (z) \u2014 المثلى \u2248 0.577','',1];
+  let f=[...common];
+  if(wizShape==='trapezoid'||wizShape==='triangle')f.push(z);
+  f.push(['Vmax','السرعة المسموحة (Vmax) \u2014 اختياري','m/s',2]);
+  return f;
+}
+function buildWizForm(){
+  const f=$('wizForm');f.innerHTML='';
+  const matDiv=document.createElement('div');matDiv.className='field';
+  matDiv.innerHTML='<label>مادة القناة (تحدد n) <span class="u">Manning n</span></label><select id="wizMat">'+NMAT.map((m,i)=>'<option value="'+m[1]+'"'+(i===6?' selected':'')+'>'+m[0]+' \u2014 n='+m[1]+'</option>').join('')+'</select>';
+  f.appendChild(matDiv);
+  wizFields().forEach(a=>{
+    const d=document.createElement('div');d.className='field';
+    d.innerHTML='<label>'+a[1]+' <span class="u">'+a[2]+'</span></label><input data-k="'+a[0]+'" type="number" inputmode="decimal" value="'+a[3]+'">';
+    f.appendChild(d);
+  });
+}
+document.querySelectorAll('#wizShapePick .chip').forEach(c=>{
+  c.onclick=()=>{document.querySelectorAll('#wizShapePick .chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');wizShape=c.dataset.ws;buildWizForm();$('wizReport').classList.remove('show');};
+});
+function freeboard(y){return Math.max(0.3,0.3*y);}
+function runWizard(){
+  const v={};$('wizForm').querySelectorAll('input').forEach(i=>{const t=i.value.trim();v[i.dataset.k]=t===''?null:parseFloat(t);});
+  const n=parseFloat($('wizMat').value);
+  const rep=$('wizReport');
+  try{
+    if(!v.Q||v.Q<=0)throw'أدخل تصرفاً مطلوباً Q أكبر من صفر';
+    if(!v.S||v.S<=0)throw'أدخل ميلاً طولياً S أكبر من صفر';
+    let y,b,A,P,R,z=(v.z!==null&&v.z!==undefined)?v.z:1;
+    if(wizShape==='rectangle'){
+      const C=(1/n)*2*Math.sqrt(v.S)/Math.pow(2,2/3);
+      y=Math.pow(v.Q/C,3/8);b=2*y;A=2*y*y;P=b+2*y;R=A/P;
+    }else if(wizShape==='triangle'){
+      if(z<=0)throw'القطاع المثلثي يحتاج ميلاً جانبياً z>0';
+      const k=z,rk=z/(2*Math.sqrt(1+z*z));
+      const C=(1/n)*k*Math.pow(rk,2/3)*Math.sqrt(v.S);
+      y=Math.pow(v.Q/C,3/8);A=z*y*y;P=2*y*Math.sqrt(1+z*z);R=A/P;b=0;
+    }else{
+      if(z<0)throw'الميل الجانبي z لا يكون سالباً';
+      const k=2*Math.sqrt(1+z*z)-z;
+      const C=(1/n)*k*Math.sqrt(v.S)/Math.pow(2,2/3);
+      y=Math.pow(v.Q/C,3/8);b=2*y*(Math.sqrt(1+z*z)-z);A=(b+z*y)*y;P=b+2*y*Math.sqrt(1+z*z);R=A/P;
+    }
+    const V=v.Q/A;
+    const T=wizShape==='rectangle'?b:(b+2*z*y);
+    const Fr=V/Math.sqrt(g*A/T);
+    const fb=freeboard(y),ytot=y+fb;
+    const Btot=wizShape==='rectangle'?b:(b+2*z*ytot);
+    const checks=[];
+    if(v.Vmax&&V>v.Vmax)checks.push(['danger','\u26A0','السرعة المصمَّمة ('+fmt(V)+' m/s) تتجاوز المسموح ('+v.Vmax+' m/s) \u2014 خطر نحر. قلّل الميل S أو غيّر المادة.']);
+    else if(V>2.0)checks.push(['danger','\u26A0','السرعة ('+fmt(V)+' m/s) عالية \u2014 خطر نحر القاع.']);
+    else if(V<0.3)checks.push(['caution','\u25D4','السرعة ('+fmt(V)+' m/s) منخفضة \u2014 احتمال إطماء.']);
+    else checks.push(['ok','\u2713','السرعة ('+fmt(V)+' m/s) ضمن النطاق الآمن.']);
+    if(Math.abs(Fr-1)<=0.1&&Fr!==1)checks.push(['info','\u2248','فرود ('+fmt(Fr)+') قريب من الحرج \u2014 يُفضّل الابتعاد عن منطقة عدم الاستقرار.']);
+    checks.push(['ok','\u2713','القطاع على شرط الكفاءة القصوى (R = y/2) \u2014 أصغر محيط مبلل وأقل تكلفة.']);
+    const rows=[['عمق الماء y',fmt(y),'m']];
+    if(wizShape!=='triangle')rows.push(['عرض القاع b',fmt(b),'m']);
+    rows.push(['الميل الجانبي z',wizShape==='rectangle'?'0 (رأسي)':fmt(z),'']);
+    rows.push(['البُحبوحة Freeboard',fmt(fb),'m']);
+    rows.push(['العمق الكلي',fmt(ytot),'m']);
+    rows.push(['عرض السطح T',fmt(T),'m']);
+    rows.push(['العرض الكلي العلوي',fmt(Btot),'m']);
+    rows.push(['المساحة A',fmt(A),'m\u00B2']);
+    rows.push(['المحيط P',fmt(P),'m']);
+    rows.push(['نصف القطر R',fmt(R),'m']);
+    rows.push(['السرعة V',fmt(V),'m/s']);
+    rows.push(['عدد فرود Fr',fmt(Fr),'']);
+    rep.innerHTML='<div class="wiz-head">تقرير التصميم \u2014 '+(wizShape==='rectangle'?'قطاع مستطيل':wizShape==='triangle'?'قطاع مثلثي':'قطاع شبه منحرف')+' (الأكثر كفاءة)</div><div><div class="wiz-sec-title">الأبعاد المصمَّمة</div><div class="out-grid">'+rows.map(r=>'<div class="out-cell" style="border-right-color:var(--amber)"><div class="lbl">'+r[0]+'</div><div class="val">'+r[1]+'<span class="vu">'+r[2]+'</span></div></div>').join('')+'</div></div><div><div class="wiz-sec-title">التحقق الهندسي</div><div class="warns">'+checks.map(c=>'<div class="warn '+c[0]+'"><span class="ico">'+c[1]+'</span><span>'+c[2]+'</span></div>').join('')+'</div></div><div class="wiz-note">المعطيات: Q='+v.Q+' m\u00B3/s \u00B7 n='+n+' \u00B7 S='+v.S+(wizShape!=='rectangle'?' \u00B7 z='+z:'')+'<br>الطريقة: المقطع الأكثر كفاءة هيدروليكياً (R=y/2)؛ البُحبوحة = 30% من العمق بحد أدنى 0.3م.</div>';
+    rep.classList.add('show');
+    addHist('تصميم '+(wizShape==='rectangle'?'مستطيل':wizShape==='triangle'?'مثلثي':'شبه منحرف')+' Q='+v.Q,'y='+fmt(y)+' b='+fmt(b),'hyd');
+  }catch(e){
+    rep.innerHTML='<div class="warn danger" style="direction:rtl"><span class="ico">\u26A0</span><span>'+e+'</span></div>';
+    rep.classList.add('show');
+  }
+}
+$('wizRun').onclick=runWizard;
+buildWizForm();
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{});});}
+render();setRes('0');buildHydForm();buildUnitPick();fillUnitSelects();convertU();renderHist();
+</script>
+</body>
+</html>
